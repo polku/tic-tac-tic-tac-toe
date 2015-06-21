@@ -207,7 +207,7 @@ let mplay_move mgrid move player =
 
 let legal_move mgrid move =
     let get_case () =
-        List.nth (List.nth mgrid (gPos (posX move))) (gPos (posY move))
+        List.nth (List.nth mgrid (gPos (posY move))) (gPos (posX move))
     in
     let y_case = cPos (posX move) in 
     let x_case = cPos (posY move) in
