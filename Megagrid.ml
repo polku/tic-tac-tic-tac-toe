@@ -58,7 +58,7 @@ module Grid =
 			| _ -> false
 
 
-(*   Updated: 2015/06/21 16:26:13 by gchateau         ###   ########.fr       *)
+(*   Updated: 2015/06/21 16:48:13 by gchateau         ###   ########.fr       *)
 		let play_move grid move player =
 			let getX () = match move with
 				| (x, _) -> x
@@ -167,37 +167,6 @@ let cPos n = match n with
   | 2 | 5 | 8    -> 1
   | 3 | 6 | 9    -> 2
   | _            -> failwith "Illegal move."
-
-let print_debug x y gx gy cx cy str =
-  print_endline str;
-  print_string "x: ";
-  print_int x;
-  print_string "; y: ";
-  print_int y;
-  print_string "\nx_grid: ";
-  print_int gx;
-  print_string "; y_grid: ";
-  print_int gy;
-  print_string "\nx_case: ";
-  print_int cx;
-  print_string "; y_case: ";
-  print_int cy;
-  print_endline "\n"
-
-let posX (x, _) = x
-let posY (_, y) = y
-
-let gPos n = match n with
-  | 1 | 2 | 3	-> 0
-  | 4 | 5 | 6	-> 1
-  | 7 | 8 | 9	-> 2
-  | _			-> failwith "Illegal move."
-
-let cPos n = match n with
-  | 1 | 4 | 7	-> 0
-  | 2 | 5 | 8	-> 1
-  | 3 | 6 | 9	-> 2
-  | _			-> failwith "Illegal move."
 
 (** Play a move int he megagrid first finding the grid to play in *)
 let mplay_move mgrid move player =

@@ -6,7 +6,7 @@
 (*   By: gchateau <gchateau@student.42.fr>          +#+  +:+       +#+        *)
 (*                                                +#+#+#+#+#+   +#+           *)
 (*   Created: 2015/06/20 10:45:49 by gchateau          #+#    #+#             *)
-(*   Updated: 2015/06/21 15:15:31 by gchateau         ###   ########.fr       *)
+(*   Updated: 2015/06/21 17:02:16 by gchateau         ###   ########.fr       *)
 (*                                                                            *)
 (* ************************************************************************** *)
 
@@ -32,3 +32,11 @@ let rec read_position () =
 		| [y; x] when x < 10  && x > 0 && y < 10 && x > 0	-> print_char '\n'; (x, y)
 		| [y; x] when x > 9 || x < 1 || y > 9 || y < 1		-> print_endline "Illegal move."; read_position ()
 		| _													-> print_endline "Incorrect format."; read_position ()
+
+let rec read_retry () =
+  print_endline "Do you want to retry ? (y/n)";
+  let response = read_line () in
+	match response with
+	  | "y" | "yes"	-> true
+	  | "n" | "no"	-> false
+	  | _			-> print_endline "Incorrect format."; read_retry ()
