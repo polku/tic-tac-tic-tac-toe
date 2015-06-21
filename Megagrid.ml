@@ -1,5 +1,5 @@
 
-module Grid
+module Grid = 
 	struct
 
 		type case = X | O | Empty of int * int
@@ -69,7 +69,6 @@ module Grid
 			| [ [a ; _ ; _] ; [_ ; b ; _] ; [_ ; _ ; c] ; ] when a = b && b = c && (a = X || a = O) -> true
 			| [ [_ ; _ ; a] ; [_ ; b ; _] ; [c ; _ ; _] ; ] when a = b && b = c && (a = X || a = O) -> true
 			| [ [a ; b ; c] ; [d ; e ; f] ; [g ; h ; i] ; ] when (a = X || a = O) && (b = X || b = O) && 
-																	(a = X || a = O) && (b = X || b = O) && 
 																	(c = X || c = O) && (d = X || d = O) && 
 																	(e = X || e = O) && (f = X || f = O) && 
 																	(g = X || g = O) && (h = X || h = O) &&
@@ -81,7 +80,7 @@ module Grid
 
 (* Megagrid functions *)
 
-type megaline = grid list
+type megaline = Grid.grid list
 
 type megagrid = megaline list
 
@@ -99,12 +98,12 @@ let mgrid_to_string mgrid =
 	List.map mline_to_string mgrid 
 
 let mgrid_to_string mgrid =
-	let get_mline mgrid n =
+	let get_mline n =
 		List.nth mgrid n
 	in
 	let rec loop ml line =
 		let get_str m g l =
-			List.nth (Grid.grid_to_string (List.nth (get_mline mgrid_test1 m) g)) l
+			List.nth (Grid.grid_to_string (List.nth (get_mline m) g)) l
 		in
 		let get_line m l =
 			[ get_str m 0 l ^ " | " ^ get_str m 1 l ^ " | " ^ get_str m 2 l ]
@@ -113,7 +112,7 @@ let mgrid_to_string mgrid =
 			| (x, y) when x > 2 -> []
 			| (x, y) when y = 2 -> (get_line x y) @ ["=-=-=-=-=-=-=-=-=-=-="] @(loop (x+1) 0)
 			| (x, y) -> (get_line x y) @ (loop x (y+1))
-		in
+	in
   	loop 0 0
 
 let display mgrid =
@@ -121,20 +120,25 @@ let display mgrid =
 	List.iter print_endline lines
 
 (* *)
-let m_check_win megagrid = match mgrid
-	| [ [a ; b ; c] ; [_ ; _ ; _] ; [_ ; _ ; _] ; ] when a = b && b = c && (a = Xwin || a = Owin) -> true
-	| [ [_ ; _ ; _] ; [a ; b ; c] ; [_ ; _ ; _] ; ] when a = b && b = c && (a = Xwin || a = Owin) -> true
-	| [ [_ ; _ ; _] ; [_ ; _ ; _] ; [a ; b ; c] ; ] when a = b && b = c && (a = Xwin || a = Owin) -> true
-	| [ [a ; _ ; _] ; [b ; _ ; _] ; [c ; _ ; _] ; ] when a = b && b = c && (a = Xwin || a = Owin) -> true
-	| [ [_ ; a ; _] ; [_ ; b ; _] ; [_ ; c ; _] ; ] when a = b && b = c && (a = Xwin || a = Owin) -> true
-	| [ [_ ; _ ; a] ; [_ ; _ ; b] ; [_ ; _ ; c] ; ] when a = b && b = c && (a = Xwin || a = Owin) -> true
-	| [ [a ; _ ; _] ; [_ ; b ; _] ; [_ ; _ ; c] ; ] when a = b && b = c && (a = Xwin || a = Owin) -> true
-	| [ [_ ; _ ; a] ; [_ ; b ; _] ; [c ; _ ; _] ; ] when a = b && b = c && (a = Xwin || a = Owin) -> true
-	| ...
+let m_check_win mgrid = match mgrid with 
+	| [ [a ; b ; c] ; [_ ; _ ; _] ; [_ ; _ ; _] ; ] when a = b && b = c && (a = Grid.Xwin || a = Grid.Owin) -> true
+	| [ [_ ; _ ; _] ; [a ; b ; c] ; [_ ; _ ; _] ; ] when a = b && b = c && (a = Grid.Xwin || a = Grid.Owin) -> true
+	| [ [_ ; _ ; _] ; [_ ; _ ; _] ; [a ; b ; c] ; ] when a = b && b = c && (a = Grid.Xwin || a = Grid.Owin) -> true
+	| [ [a ; _ ; _] ; [b ; _ ; _] ; [c ; _ ; _] ; ] when a = b && b = c && (a = Grid.Xwin || a = Grid.Owin) -> true
+	| [ [_ ; a ; _] ; [_ ; b ; _] ; [_ ; c ; _] ; ] when a = b && b = c && (a = Grid.Xwin || a = Grid.Owin) -> true
+	| [ [_ ; _ ; a] ; [_ ; _ ; b] ; [_ ; _ ; c] ; ] when a = b && b = c && (a = Grid.Xwin || a = Grid.Owin) -> true
+	| [ [a ; _ ; _] ; [_ ; b ; _] ; [_ ; _ ; c] ; ] when a = b && b = c && (a = Grid.Xwin || a = Grid.Owin) -> true
+	| [ [_ ; _ ; a] ; [_ ; b ; _] ; [c ; _ ; _] ; ] when a = b && b = c && (a = Grid.Xwin || a = Grid.Owin) -> true
+	| [ [a ; b ; c] ; [d ; e ; f] ; [g ; h ; i] ; ] when (a = Grid.Xwin || a = Grid.Owin) && (b = Grid.Xwin || b = Grid.Owin) && 
+														(c = Grid.Xwin || c = Grid.Owin) && (d = Grid.Xwin || d = Grid.Owin) && 
+														(e = Grid.Xwin || e = Grid.Owin) && (f = Grid.Xwin || f = Grid.Owin) && 
+														(g = Grid.Xwin || g = Grid.Owin) && (h = Grid.Xwin || h = Grid.Owin) &&
+															(i = Grid.Xwin || i = Grid.Owin)
+															-> true
 	| _ -> false
 
 
 
-
-
+let () =
+	display megagrid_at_start ;
 
