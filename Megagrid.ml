@@ -57,6 +57,7 @@ module Grid =
 															-> true
 			| _ -> false
 
+
 		(** Play a move in a grid, return grid updated *)
 		let play_move grid move player =
 			let getX () = match move with
@@ -175,9 +176,4 @@ let mplay_move mgrid move player =
 		else (new_line (List.nth mgrid n) n) :: mloop (n+1)
 	in
 	mloop 0
-
-
-let () =
-	display megagrid_at_start ;
-	display (mplay_move megagrid_at_start (5,3) Grid.X)
 
