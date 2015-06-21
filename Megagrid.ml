@@ -32,8 +32,8 @@ module Grid =
 				List.map line_to_string grid
 			in
 			match grid with
-				| Xwin -> ["x x x"; "x x x"; "x x x"]
-				| Owin -> ["o o o"; "o o o"; "o o o"]
+				| Xwin -> [" █ █ "; "  █  "; " █ █ "]
+				| Owin -> ["█████"; "█   █"; "█████"]
 				| Playing a -> g_to_string a
 
 
