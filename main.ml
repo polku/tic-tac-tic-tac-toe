@@ -6,7 +6,7 @@
 (*   By: gchateau <gchateau@student.42.fr>          +#+  +:+       +#+        *)
 (*                                                +#+#+#+#+#+   +#+           *)
 (*   Created: 2015/06/20 10:42:43 by gchateau          #+#    #+#             *)
-(*   Updated: 2015/06/21 17:11:32 by gchateau         ###   ########.fr       *)
+(*   Updated: 2015/06/21 20:10:03 by gchateau         ###   ########.fr       *)
 (*                                                                            *)
 (* ************************************************************************** *)
 
@@ -15,41 +15,43 @@ let main () =
   let rec p1_input mgrid =
 	Megagrid.display mgrid;
 	print_endline "O's turn to play.";
-	let rec tmp_input () = try Megagrid.mplay_move mgrid (Input.read_position ()) Megagrid.Grid.O with
-	  | Failure "Illegal move."		-> print_endline "Illegal move."; tmp_input ()
-	in
-	let mg = tmp_input () in
-	  if Megagrid.mcheck_win mg then
-		begin
-		  print_endline "O wins the game!";
-		  let tmp_retry () = Input.read_retry () in
-			if tmp_retry () then
-			  begin
-				print_char '\n';
-				p1_input game
-			  end
-			else exit 0
-		end
-	  else p2_input (mg)
+	let rec mv_input () =
+	  let tmp = Input.read_position () in
+		if Megagrid.legal_move mgrid tmp then
+		  begin
+			let res = Megagrid.mplay_move mgrid tmp Megagrid.Grid.O in
+			  if Megagrid.mcheck_win res then
+				begin
+				  print_endline "O wins the game!\n";
+				  Megagrid.display res;
+				  match Input.read_retry () with
+					| true	-> print_char '\n'; p1_input game
+					| false	-> exit 0
+				end
+			  else p2_input (res)			
+		  end
+		else (print_endline "Illegal move."; mv_input ())
+	in mv_input ()
   and p2_input mgrid =
 	Megagrid.display mgrid;
 	print_endline "X's turn to play.";
-	let rec tmp_input () = try Megagrid.mplay_move mgrid (Input.read_position ()) Megagrid.Grid.X with
-	  | Failure "Illegal move."		-> print_endline "Illegal move."; tmp_input ()
-	in
-	let mg = tmp_input () in
-	  if Megagrid.mcheck_win mg then
-		begin
-		  print_endline "X wins the game!";
-		  let tmp_retry () = Input.read_retry () in
-			if tmp_retry () then
-			  begin
-				print_char '\n';
-				p1_input game
-			  end
-			else exit 0
-		end
-	  else p1_input (mg)
+	let rec mv_input () =
+	  let tmp = Input.read_position () in
+		if Megagrid.legal_move mgrid tmp then
+		  begin
+			let res = Megagrid.mplay_move mgrid tmp Megagrid.Grid.X in
+			  if Megagrid.mcheck_win res then
+				begin
+				  print_endline "X wins the game!\n";
+				  Megagrid.display res;
+				  match Input.read_retry () with
+					| true	-> print_char '\n'; p1_input game
+					| false	-> exit 0
+				end
+			  else p1_input (res)			
+		  end
+		else (print_endline "Illegal move."; mv_input ())
+	in mv_input ()
   in
   p1_input game
 

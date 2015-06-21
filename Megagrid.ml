@@ -58,7 +58,6 @@ module Grid =
 			| _ -> false
 
 
-(*   Updated: 2015/06/21 16:48:13 by gchateau         ###   ########.fr       *)
 		let play_move grid move player =
 			let getX () = match move with
 				| (x, _) -> x
@@ -68,8 +67,6 @@ module Grid =
 			in
 			let new_case c xp yp = match c with
 				| Empty (x, y) when x = getX () && y = getY () -> player
-				| X when xp = getX () && yp = getY () -> failwith "Illegal move."
-				| O when xp = getX () && yp = getY () -> failwith "Illegal move."
 				| _ -> c 
 			in
 			let new_line l num =
@@ -83,9 +80,25 @@ module Grid =
 				if n = 3 then []
 				else (new_line (List.nth grid n) n) :: gloop (n+1)
 			in
-			if check_win (Playing(gloop 0)) && player = X then Xwin
-			else if check_win (Playing(gloop 0)) && player = O then Owin
+			if check_win (Playing(gloop 0)) && player = X then (print_endline "X win a grid!"; Xwin)
+			else if check_win (Playing(gloop 0)) && player = O then (print_endline "O win a grid!"; Owin)
 			else Playing(gloop 0)
+
+
+		let legal_move grid move =
+            let getX () = match move with
+              | (x, _) -> x
+            in
+            let getY () = match move with
+              | (_, y) -> y
+            in
+            let get_case () =
+                List.nth (List.nth grid (getX ())) (getY ())
+            in
+            match get_case () with 
+              | Empty(_, _) -> true
+              | _ -> false
+
 
 		let identity g = match g with
 			| Playing a -> Playing a
@@ -97,7 +110,7 @@ module Grid =
 
 type megaline = Grid.grid list
 
-type megagrid = megaline list
+type megagrid = Error | Mgrid of megaline list
 
 let megagrid_at_start = [ 
 							[ Grid.grid_at_start ; Grid.grid_at_start ; Grid.grid_at_start ;] ;
@@ -160,13 +173,13 @@ let gPos n = match n with
   | 1 | 2 | 3    -> 0
   | 4 | 5 | 6    -> 1
   | 7 | 8 | 9    -> 2
-  | _            -> failwith "Illegal move."
+  | _            -> -1
 
 let cPos n = match n with
   | 1 | 4 | 7    -> 0
   | 2 | 5 | 8    -> 1
   | 3 | 6 | 9    -> 2
-  | _            -> failwith "Illegal move."
+  | _            -> -1
 
 (** Play a move int he megagrid first finding the grid to play in *)
 let mplay_move mgrid move player =
@@ -176,8 +189,6 @@ let mplay_move mgrid move player =
 	let x_case = cPos (posY move) in
 	let new_grid g x y = match g with 
 		| Grid.Playing (a) when x = x_grid && y = y_grid -> Grid.play_move a (x_case,y_case) player
-		| Grid.Xwin when x = x_grid && y = y_grid -> failwith "Illegal move."
-		| Grid.Owin when x = x_grid && y = y_grid -> failwith "Illegal move."
 		| _ -> g
 	in
 	let new_line l num =
@@ -193,3 +204,14 @@ let mplay_move mgrid move player =
 	in
 	mloop 0
 	(* + check win et ajout variant pour victoire finale *)
+
+let legal_move mgrid move =
+    let get_case () =
+        List.nth (List.nth mgrid (gPos (posX move))) (gPos (posY move))
+    in
+    let y_case = cPos (posX move) in 
+    let x_case = cPos (posY move) in
+    let thegrid = get_case () in
+    match thegrid with
+      | Grid.Xwin | Grid.Owin -> false
+      | Grid.Playing(t) -> Grid.legal_move t (x_case, y_case)
