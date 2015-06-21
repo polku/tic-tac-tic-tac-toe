@@ -154,24 +154,27 @@ let mplay_move mgrid move player =
 	let getY () = match move with
 		| (_, y) -> y
 	in
+	let y_grid = getY() / 3 in 
+	let x_grid = getX() / 3 in
+	let y_case = getY() mod 3 in 
+	let x_case = getX() mod 3 in	
 	let new_grid g x y = match g with 
-		| Grid.Playing (a) when x = getX () && y = getY () -> Grid.play_move a (x/3,y/3) player
+		| Grid.Playing (a) when x = x_grid && y = y_grid -> Grid.play_move a (x_case,y_case) player
 		| Grid.Xwin | Grid.Owin -> failwith "Illegal move"
 		| _ -> g
 	in
-	let new_line l =
+	let new_line l num =
 		let rec loop n =
 			if n = 3 then []
-			else (new_grid (List.nth l n) (-1) n) :: loop (n+1)
+			else (new_grid (List.nth l n) n num) :: loop (n + 1)
 		in
 		loop 0
 	in
 	let rec mloop n =
 		if n = 3 then []
-		else (new_line (List.nth mgrid n)) :: mloop (n+1)
+		else (new_line (List.nth mgrid n) n) :: mloop (n+1)
 	in
 	mloop 0
-
 
 
 let () =
