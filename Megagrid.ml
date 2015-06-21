@@ -58,7 +58,7 @@ module Grid =
 			| _ -> false
 
 
-(*   Updated: 2015/06/21 15:56:29 by gchateau         ###   ########.fr       *)
+(*   Updated: 2015/06/21 16:26:13 by gchateau         ###   ########.fr       *)
 		let play_move grid move player =
 			let getX () = match move with
 				| (x, _) -> x
@@ -66,20 +66,26 @@ module Grid =
 			let getY () = match move with
 				| (_, y) -> y
 			in
-			let new_grid () =
-				let new_case c = match c with
-					| Empty (x, y) when x = getX () && y = getY () -> player
-					| X | O -> failwith "Illegal move."
-					| _ -> c 
-				in
-				let new_line n =
-					List.map new_case (List.nth grid n)
-				in
-				Playing([ new_line 0 ; new_line 1 ; new_line 2 ])
+			let new_case c xp yp = match c with
+				| Empty (x, y) when x = getX () && y = getY () -> player
+				| X when xp = getX () && yp = getY () -> failwith "Illegal move."
+				| O when xp = getX () && yp = getY () -> failwith "Illegal move."
+				| _ -> c 
 			in
-			if check_win (new_grid ()) && player = X then Xwin
-			else if check_win (new_grid ()) && player = O then Owin
-			else new_grid ()
+			let new_line l num =
+				let rec loop n =
+					if n = 3 then []
+					else (new_case (List.nth l n) n num) :: loop (n + 1)
+				in
+				loop 0
+			in
+			let rec gloop n =
+				if n = 3 then []
+				else (new_line (List.nth grid n) n) :: gloop (n+1)
+			in
+			if check_win (Playing(gloop 0)) && player = X then Xwin
+			else if check_win (Playing(gloop 0)) && player = O then Owin
+			else Playing(gloop 0)
 
 		let identity g = match g with
 			| Playing a -> Playing a
@@ -147,6 +153,21 @@ let mcheck_win mgrid = match mgrid with
 															-> true
 	| _ -> false
 
+let posX (x, _) = x
+let posY (_, y) = y
+
+let gPos n = match n with
+  | 1 | 2 | 3    -> 0
+  | 4 | 5 | 6    -> 1
+  | 7 | 8 | 9    -> 2
+  | _            -> failwith "Illegal move."
+
+let cPos n = match n with
+  | 1 | 4 | 7    -> 0
+  | 2 | 5 | 8    -> 1
+  | 3 | 6 | 9    -> 2
+  | _            -> failwith "Illegal move."
+
 let print_debug x y gx gy cx cy str =
   print_endline str;
   print_string "x: ";
@@ -185,9 +206,10 @@ let mplay_move mgrid move player =
 	let y_case = cPos (posX move) in 
 	let x_case = cPos (posY move) in
 	let new_grid g x y = match g with 
-		| Grid.Playing (a) when x = x_grid && y = y_grid -> print_debug x y x_grid y_grid x_case y_case "x = x_grid && y = y_grid"; Grid.play_move a (x_case,y_case) player
-		| Grid.Xwin | Grid.Owin -> failwith "Illegal move."
-		| _ -> print_debug x y x_grid y_grid x_case y_case "_"; g
+		| Grid.Playing (a) when x = x_grid && y = y_grid -> Grid.play_move a (x_case,y_case) player
+		| Grid.Xwin when x = x_grid && y = y_grid -> failwith "Illegal move."
+		| Grid.Owin when x = x_grid && y = y_grid -> failwith "Illegal move."
+		| _ -> g
 	in
 	let new_line l num =
 		let rec loop n =
@@ -201,4 +223,4 @@ let mplay_move mgrid move player =
 		else (new_line (List.nth mgrid n) n) :: mloop (n+1)
 	in
 	mloop 0
-
+	(* + check win et ajout variant pour victoire finale *)
