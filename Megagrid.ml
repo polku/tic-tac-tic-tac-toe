@@ -37,6 +37,26 @@ module Grid =
 				| Playing a -> g_to_string a
 
 
+
+		(* Check win in a grid *)
+		let check_win grid = match grid with
+			| Xwin | Owin -> true
+			| Playing([ [a ; b ; c] ; [_ ; _ ; _] ; [_ ; _ ; _] ; ]) when a = b && b = c && (a = X || a = O) -> true
+			| Playing([ [_ ; _ ; _] ; [a ; b ; c] ; [_ ; _ ; _] ; ]) when a = b && b = c && (a = X || a = O) -> true
+			| Playing([ [_ ; _ ; _] ; [_ ; _ ; _] ; [a ; b ; c] ; ]) when a = b && b = c && (a = X || a = O) -> true
+			| Playing([ [a ; _ ; _] ; [b ; _ ; _] ; [c ; _ ; _] ; ]) when a = b && b = c && (a = X || a = O) -> true
+			| Playing([ [_ ; a ; _] ; [_ ; b ; _] ; [_ ; c ; _] ; ]) when a = b && b = c && (a = X || a = O) -> true
+			| Playing([ [_ ; _ ; a] ; [_ ; _ ; b] ; [_ ; _ ; c] ; ]) when a = b && b = c && (a = X || a = O) -> true
+			| Playing([ [a ; _ ; _] ; [_ ; b ; _] ; [_ ; _ ; c] ; ]) when a = b && b = c && (a = X || a = O) -> true
+			| Playing([ [_ ; _ ; a] ; [_ ; b ; _] ; [c ; _ ; _] ; ]) when a = b && b = c && (a = X || a = O) -> true
+			| Playing([ [a ; b ; c] ; [d ; e ; f] ; [g ; h ; i] ; ]) when (a = X || a = O) && (b = X || b = O) && 
+																	(c = X || c = O) && (d = X || d = O) && 
+																	(e = X || e = O) && (f = X || f = O) && 
+																	(g = X || g = O) && (h = X || h = O) &&
+																	(i = X || i = O)
+															-> true
+			| _ -> false
+
 		(** Play a move in a grid, return grid updated *)
 		let play_move grid move player =
 			let getX () = match move with
@@ -54,27 +74,15 @@ module Grid =
 				let new_line n =
 					List.map new_case (List.nth grid n)
 				in
-				[ new_line 0 ; new_line 1 ; new_line 2 ]
+				Playing([ new_line 0 ; new_line 1 ; new_line 2 ])
 			in
-			new_grid ()
+			if check_win (new_grid ()) && player = X then Xwin
+			else if check_win (new_grid ()) && player = O then Owin
+			else new_grid ()
 
-		(* Check win in a grid *)
-		let check_win grid = match grid with
-			| [ [a ; b ; c] ; [_ ; _ ; _] ; [_ ; _ ; _] ; ] when a = b && b = c && (a = X || a = O) -> true
-			| [ [_ ; _ ; _] ; [a ; b ; c] ; [_ ; _ ; _] ; ] when a = b && b = c && (a = X || a = O) -> true
-			| [ [_ ; _ ; _] ; [_ ; _ ; _] ; [a ; b ; c] ; ] when a = b && b = c && (a = X || a = O) -> true
-			| [ [a ; _ ; _] ; [b ; _ ; _] ; [c ; _ ; _] ; ] when a = b && b = c && (a = X || a = O) -> true
-			| [ [_ ; a ; _] ; [_ ; b ; _] ; [_ ; c ; _] ; ] when a = b && b = c && (a = X || a = O) -> true
-			| [ [_ ; _ ; a] ; [_ ; _ ; b] ; [_ ; _ ; c] ; ] when a = b && b = c && (a = X || a = O) -> true
-			| [ [a ; _ ; _] ; [_ ; b ; _] ; [_ ; _ ; c] ; ] when a = b && b = c && (a = X || a = O) -> true
-			| [ [_ ; _ ; a] ; [_ ; b ; _] ; [c ; _ ; _] ; ] when a = b && b = c && (a = X || a = O) -> true
-			| [ [a ; b ; c] ; [d ; e ; f] ; [g ; h ; i] ; ] when (a = X || a = O) && (b = X || b = O) && 
-																	(c = X || c = O) && (d = X || d = O) && 
-																	(e = X || e = O) && (f = X || f = O) && 
-																	(g = X || g = O) && (h = X || h = O) &&
-																	(i = X || i = O)
-															-> true
-			| _ -> false
+		let identity g = match g with
+			| Playing a -> Playing a
+			| _ -> g
 
 	end
 
@@ -117,10 +125,11 @@ let mgrid_to_string mgrid =
 
 let display mgrid =
 	let lines = mgrid_to_string mgrid in
-	List.iter print_endline lines
+	List.iter print_endline lines ;
+	print_endline "                     "
 
-(* *)
-let m_check_win mgrid = match mgrid with 
+(** Check win on the megagrid*)
+let mcheck_win mgrid = match mgrid with 
 	| [ [a ; b ; c] ; [_ ; _ ; _] ; [_ ; _ ; _] ; ] when a = b && b = c && (a = Grid.Xwin || a = Grid.Owin) -> true
 	| [ [_ ; _ ; _] ; [a ; b ; c] ; [_ ; _ ; _] ; ] when a = b && b = c && (a = Grid.Xwin || a = Grid.Owin) -> true
 	| [ [_ ; _ ; _] ; [_ ; _ ; _] ; [a ; b ; c] ; ] when a = b && b = c && (a = Grid.Xwin || a = Grid.Owin) -> true
@@ -137,8 +146,35 @@ let m_check_win mgrid = match mgrid with
 															-> true
 	| _ -> false
 
+(** Play a move int he megagrid first finding the grid to play in *)
+let mplay_move mgrid move player =
+	let getX () = match move with
+		| (x, _) -> x
+	in
+	let getY () = match move with
+		| (_, y) -> y
+	in
+	let new_grid g x y = match g with 
+		| Grid.Playing (a) when x = getX () && y = getY () -> Grid.play_move a (x/3,y/3) player
+		| Grid.Xwin | Grid.Owin -> failwith "Illegal move"
+		| _ -> g
+	in
+	let new_line l =
+		let rec loop n =
+			if n = 3 then []
+			else (new_grid (List.nth l n) (-1) n) :: loop (n+1)
+		in
+		loop 0
+	in
+	let rec mloop n =
+		if n = 3 then []
+		else (new_line (List.nth mgrid n)) :: mloop (n+1)
+	in
+	mloop 0
+
 
 
 let () =
 	display megagrid_at_start ;
+	display (mplay_move megagrid_at_start (5,3) Grid.X)
 
