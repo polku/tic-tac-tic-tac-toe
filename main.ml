@@ -6,7 +6,7 @@
 (*   By: gchateau <gchateau@student.42.fr>          +#+  +:+       +#+        *)
 (*                                                +#+#+#+#+#+   +#+           *)
 (*   Created: 2015/06/20 10:42:43 by gchateau          #+#    #+#             *)
-(*   Updated: 2015/06/21 14:20:14 by gchateau         ###   ########.fr       *)
+(*   Updated: 2015/06/21 15:22:21 by gchateau         ###   ########.fr       *)
 (*                                                                            *)
 (* ************************************************************************** *)
 
@@ -24,14 +24,14 @@ let main ac av =
 	Megagrid.display mgrid;
 	print_endline "\nO's turn to play.";
 	let rec tmp_input () = try Megagrid.mplay_move mgrid (print_tuple (Input.read_position ())) Megagrid.Grid.O with
-	  | Failure "Illegal move."		-> tmp_input ()
+	  | Failure "Illegal move."		-> print_endline "Illegal move."; tmp_input ()
 	in
 	p2_input (tmp_input ());
   and p2_input mgrid =
 	Megagrid.display mgrid;
 	print_endline "\nX's turn to play.";
 	let rec tmp_input () = try Megagrid.mplay_move mgrid (print_tuple (Input.read_position ())) Megagrid.Grid.X with
-	  | Failure "Illegal move."		-> tmp_input ()
+	  | Failure "Illegal move."		-> print_endline "Illegal move."; tmp_input ()
 	in
 	p1_input (tmp_input ());
   in
